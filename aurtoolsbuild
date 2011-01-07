@@ -52,5 +52,7 @@ fi
 echo "Building in chroot for [${repo}] (${arch})..."
 setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
 
+sudo umount ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+
 repo-add /var/tmp/aurtoolsrepo/aurtools.db.tar.gz *.pkg.tar.xz
 mv *.pkg.tar.xz /var/tmp/aurtoolsrepo
