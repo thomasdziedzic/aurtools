@@ -29,6 +29,8 @@ while getopts 'cr:' arg; do
 	esac
 done
 
+mkdir -p /var/tmp/aurtoolsrepo
+
 if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 	echo "Creating chroot for [${repo}] (${arch})..."
 	sudo rm -rf ${chroots}/${repo}-${arch}
@@ -38,9 +40,9 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 		-M /usr/share/devtools/makepkg-${arch}.conf \
 		${chroots}/${repo}-${arch}/root \
 		${base_packages}
-	mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
 else
-	mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
 	setarch ${arch} sudo mkarchroot \
 		-u \
 		${chroots}/${repo}-${arch}/root
