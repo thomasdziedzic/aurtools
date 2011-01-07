@@ -41,9 +41,9 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 		${chroots}/${repo}-${arch}/root \
 		${base_packages}
 	sudo mkdir -p ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
-	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
 else
-	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
 	setarch ${arch} sudo mkarchroot \
 		-u \
 		${chroots}/${repo}-${arch}/root
