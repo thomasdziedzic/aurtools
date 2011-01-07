@@ -1,0 +1,53 @@
+#!/bin/bash
+
+base_packages='base base-devel sudo'
+
+cmd="$(basename "${0%-build}")"
+if [ "${cmd%-*}" == 'multilib' ]; then
+        repo="${cmd}"
+        arch='x86_64'
+	base_packages+=' gcc-multilib libtool-multilib'
+else
+	repo=${cmd%-*}
+	arch=${cmd##*-}
+fi
+chroots='/var/tmp/aurtoolsbuild'
+clean_first=false
+
+usage() {
+	echo "usage $(basename "$0")"
+	echo '    -c         Recreate the chroot before building'
+	echo '    -r <dir>   Create chroots in this directory'
+	exit 1
+}
+
+while getopts 'cr:' arg; do
+	case "${arg}" in
+		c) clean_first=true ;;
+		r) chroots="$OPTARG" ;;
+		*) usage ;;
+	esac
+done
+
+if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
+	echo "Creating chroot for [${repo}] (${arch})..."
+	sudo rm -rf ${chroots}/${repo}-${arch}
+	sudo mkdir -p ${chroots}/${repo}-${arch}
+	setarch ${arch} sudo mkarchroot \
+		-C /usr/share/aurtools/pacman-${repo}.conf \
+		-M /usr/share/devtools/makepkg-${arch}.conf \
+		${chroots}/${repo}-${arch}/root \
+		${base_packages}
+	mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+else
+	mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	setarch ${arch} sudo mkarchroot \
+		-u \
+		${chroots}/${repo}-${arch}/root
+fi
+
+echo "Building in chroot for [${repo}] (${arch})..."
+setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
+
+repo-add /var/tmp/aurtoolsrepo/aurtools.db.tar.gz *.pkg.tar.xz
+mv *.pkg.tar.xz /var/tmp/aurtoolsrepo
