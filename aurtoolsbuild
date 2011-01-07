@@ -40,7 +40,7 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 		-M /usr/share/devtools/makepkg-${arch}.conf \
 		${chroots}/${repo}-${arch}/root \
 		${base_packages}
-	sudo mkdir -p ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+	sudo mkdir -p ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
 	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
 else
 	sudo mount --bind /var/tmp/aurtoolsrepo ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
@@ -52,7 +52,7 @@ fi
 echo "Building in chroot for [${repo}] (${arch})..."
 setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
 
-sudo umount ${chroots}/${repo}-${arch}/var/tmp/aurtoolsrepo
+sudo umount ${chroots}/${repo}-${arch}/copy/var/tmp/aurtoolsrepo
 
 repo-add /var/tmp/aurtoolsrepo/aurtools.db.tar.gz *.pkg.tar.xz
 cp *.pkg.tar.xz /var/tmp/aurtoolsrepo
