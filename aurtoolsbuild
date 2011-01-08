@@ -43,6 +43,7 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
 	sudo mount --bind /var/tmp/aurtoolsrepo/ ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
 else
+	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
 	sudo mount --bind /var/tmp/aurtoolsrepo/ ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
 	setarch ${arch} sudo mkarchroot \
 		-u \
