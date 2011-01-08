@@ -11,4 +11,5 @@ install:
 uninstall:
 	rm -rf $(DESTDIR)/usr/share/aurtools
 	rm $(DESTDIR)/usr/bin/aurtoolsbuild
-	rm $(DESTDIR)/usr/bin/aur-{i686,x86_64)-build
+	rm $(DESTDIR)/usr/bin/aur-i686-build
+	rm $(DESTDIR)/usr/bin/aur-x86_64-build
