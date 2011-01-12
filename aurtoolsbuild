@@ -31,8 +31,11 @@ done
 
 # the local aur repo dir
 AURREPODIR=/var/tmp/aurtoolsrepo/${arch}
+# store seperate caches, may fix some problems related to fetching packages for wrong architecture
+AURCACHEDIR=/var/tmp/aurtoolscache/${arch}
 
 mkdir -p ${AURREPODIR}
+mkdir -p ${AURCACHEDIR}
 
 if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 	echo "Creating chroot for [${repo}] (${arch})..."
@@ -45,9 +48,13 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 		${base_packages}
 	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
 	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
+	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
+	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
 else
 	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
 	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
+	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
+	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
 	setarch ${arch} sudo mkarchroot \
 		-u \
 		${chroots}/${repo}-${arch}/root
@@ -57,6 +64,7 @@ echo "Building in chroot for [${repo}] (${arch})..."
 setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
 
 sudo umount ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
+sudo umount ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
 
 repo-add ${AURREPODIR}/aurtools.db.tar.gz *.pkg.tar.xz
 cp *.pkg.tar.xz ${AURREPODIR}
