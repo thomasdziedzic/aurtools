@@ -29,7 +29,10 @@ while getopts 'cr:' arg; do
 	esac
 done
 
-mkdir -p /var/tmp/aurtoolsrepo
+# the local aur repo dir
+AURREPODIR=/var/tmp/aurtoolsrepo/${arch}
+
+mkdir -p ${AURREPODIR}
 
 if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 	echo "Creating chroot for [${repo}] (${arch})..."
@@ -41,10 +44,10 @@ if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 		${chroots}/${repo}-${arch}/root \
 		${base_packages}
 	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
-	sudo mount --bind /var/tmp/aurtoolsrepo/ ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
+	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
 else
 	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
-	sudo mount --bind /var/tmp/aurtoolsrepo/ ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
+	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
 	setarch ${arch} sudo mkarchroot \
 		-u \
 		${chroots}/${repo}-${arch}/root
@@ -55,5 +58,5 @@ setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
 
 sudo umount ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
 
-repo-add /var/tmp/aurtoolsrepo/aurtools.db.tar.gz *.pkg.tar.xz
-cp *.pkg.tar.xz /var/tmp/aurtoolsrepo
+repo-add ${AURREPODIR}/aurtools.db.tar.gz *.pkg.tar.xz
+cp *.pkg.tar.xz ${AURREPODIR}
