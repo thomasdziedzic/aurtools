@@ -29,10 +29,11 @@ while getopts 'cr:' arg; do
 	esac
 done
 
-# the local aur repo dir
-AURREPODIR=/var/tmp/aurtoolsrepo/${arch}
-# store seperate caches, may fix some problems related to fetching packages for wrong architecture
-AURCACHEDIR=/var/tmp/aurtoolscache/${arch}
+. /etc/aurtools.conf || echo 'failed to source /etc/aurtools.conf, now exiting' && exit 1
+
+# keep cache and repos seperate to avoid problems
+AURREPODIR=${AURREPODIR}/${arch}
+AURCACHEDIR=${AURCACHEDIR}/${arch}
 
 mkdir -p ${AURREPODIR}
 mkdir -p ${AURCACHEDIR}
