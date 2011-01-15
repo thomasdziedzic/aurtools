@@ -29,7 +29,7 @@ while getopts 'cr:' arg; do
 	esac
 done
 
-. /etc/aurtools.conf || echo 'failed to source /etc/aurtools.conf, now exiting' && exit 1
+. /etc/aurtools.conf || (echo 'failed to source /etc/aurtools.conf, now exiting' && exit 1)
 
 # keep cache and repos seperate to avoid problems
 AURREPODIR=${AURREPODIR}/${arch}
