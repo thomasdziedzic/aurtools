@@ -38,6 +38,32 @@ AURCACHEDIR=${AURCACHEDIR}/${arch}
 mkdir -p ${AURREPODIR}
 mkdir -p ${AURCACHEDIR}
 
+###############################################################################
+# Auto dependency resolution
+###############################################################################
+
+. PKGBUILD || (echo 'failed to source PKGBUILD' && exit 1)
+
+for package in ${depends[@]}; do
+  packagename=$(cower -i ${package} | awk '/Name/ { print $3 }')
+  packageversion=$(cower -i ${package} | awk '/Version/ { print $3 }')
+
+  if [ ! -z ${packagename} ]; then
+    # not in main repos, check if in our local repo
+    if [ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${arch}.pkg.tar.xz ]; then
+      # not in our local repo, recurse
+      cower -d ${package}
+      pushd ${package}
+      aur-${arch}-build
+      popd
+    fi
+  fi
+done
+
+###############################################################################
+# end of Auto dependency resolution
+###############################################################################
+
 if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
 	echo "Creating chroot for [${repo}] (${arch})..."
 	sudo rm -rf ${chroots}/${repo}-${arch}
