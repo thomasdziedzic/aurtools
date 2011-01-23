@@ -55,6 +55,10 @@ for package in ${depends[@]}; do
       cower -d ${package}
       pushd ${package}
       aur-${_arch}-build
+      if [[ $? == 1 ]]; then
+        echo "failed to build ${package} as a dependencity"
+        exit 1
+      fi
       popd
     fi
   fi
