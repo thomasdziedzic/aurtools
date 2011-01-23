@@ -5,11 +5,11 @@ base_packages='base base-devel sudo'
 cmd="$(basename "${0%-build}")"
 if [ "${cmd%-*}" == 'multilib' ]; then
         repo="${cmd}"
-        arch='x86_64'
+        _arch='x86_64'
 	base_packages+=' gcc-multilib libtool-multilib'
 else
 	repo=${cmd%-*}
-	arch=${cmd##*-}
+	_arch=${cmd##*-}
 fi
 chroots='/var/tmp/aurtoolsbuild'
 clean_first=false
@@ -32,8 +32,8 @@ done
 . /etc/aurtools.conf || (echo 'failed to source /etc/aurtools.conf, now exiting' && exit 1)
 
 # keep cache and repos seperate to avoid problems
-AURREPODIR=${AURREPODIR}/${arch}
-AURCACHEDIR=${AURCACHEDIR}/${arch}
+AURREPODIR=${AURREPODIR}/${_arch}
+AURCACHEDIR=${AURCACHEDIR}/${_arch}
 
 mkdir -p ${AURREPODIR}
 mkdir -p ${AURCACHEDIR}
@@ -50,11 +50,11 @@ for package in ${depends[@]}; do
 
   if [ ! -z ${packagename} ]; then
     # not in main repos, check if in our local repo
-    if [ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${arch}.pkg.tar.xz ]; then
+    if [ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${_arch}.pkg.tar.xz ]; then
       # not in our local repo, recurse
       cower -d ${package}
       pushd ${package}
-      aur-${arch}-build
+      aur-${_arch}-build
       popd
     fi
   fi
@@ -64,34 +64,34 @@ done
 # end of Auto dependency resolution
 ###############################################################################
 
-if ${clean_first} || [ ! -d "${chroots}/${repo}-${arch}" ]; then
-	echo "Creating chroot for [${repo}] (${arch})..."
-	sudo rm -rf ${chroots}/${repo}-${arch}
-	sudo mkdir -p ${chroots}/${repo}-${arch}
-	setarch ${arch} sudo mkarchroot \
+if ${clean_first} || [ ! -d "${chroots}/${repo}-${_arch}" ]; then
+	echo "Creating chroot for [${repo}] (${_arch})..."
+	sudo rm -rf ${chroots}/${repo}-${_arch}
+	sudo mkdir -p ${chroots}/${repo}-${_arch}
+	setarch ${_arch} sudo mkarchroot \
 		-C /usr/share/aurtools/pacman-${repo}.conf \
-		-M /usr/share/devtools/makepkg-${arch}.conf \
-		${chroots}/${repo}-${arch}/root \
+		-M /usr/share/devtools/makepkg-${_arch}.conf \
+		${chroots}/${repo}-${_arch}/root \
 		${base_packages}
-	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
-	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
-	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
-	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
+	sudo mkdir -p ${chroots}/${repo}-${_arch}/root/var/tmp/aurtoolsrepo
+	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${_arch}/root/var/tmp/aurtoolsrepo/
+	sudo mkdir -p ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
+	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
 else
-	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo
-	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
-	sudo mkdir -p ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
-	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
-	setarch ${arch} sudo mkarchroot \
+	sudo mkdir -p ${chroots}/${repo}-${_arch}/root/var/tmp/aurtoolsrepo
+	sudo mount --bind ${AURREPODIR} ${chroots}/${repo}-${_arch}/root/var/tmp/aurtoolsrepo/
+	sudo mkdir -p ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
+	sudo mount --bind ${AURCACHEDIR} ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
+	setarch ${_arch} sudo mkarchroot \
 		-u \
-		${chroots}/${repo}-${arch}/root
+		${chroots}/${repo}-${_arch}/root
 fi
 
-echo "Building in chroot for [${repo}] (${arch})..."
-setarch ${arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${arch}
+echo "Building in chroot for [${repo}] (${_arch})..."
+setarch ${_arch} sudo makechrootpkg -c -r ${chroots}/${repo}-${_arch}
 
-sudo umount ${chroots}/${repo}-${arch}/root/var/tmp/aurtoolsrepo/
-sudo umount ${chroots}/${repo}-${arch}/root/var/cache/pacman/pkg/
+sudo umount ${chroots}/${repo}-${_arch}/root/var/tmp/aurtoolsrepo/
+sudo umount ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
 
 repo-add ${AURREPODIR}/aurtools.db.tar.gz *.pkg.tar.xz
 cp *.pkg.tar.xz ${AURREPODIR}
