@@ -2,8 +2,8 @@
 
 base_packages='base base-devel sudo'
 
-cmd="$(basename "${0%-build}")"
-if [ "${cmd%-*}" == 'multilib' ]; then
+cmd="$(basename "$0" build)"
+if [[ "${cmd%-*}" == multilib ]]; then
         repo="${cmd}"
         _arch='x86_64'
 	base_packages+=' gcc-multilib libtool-multilib'
@@ -15,7 +15,7 @@ chroots='/var/tmp/aurtoolsbuild'
 clean_first=false
 
 usage() {
-	echo "usage $(basename "$0")"
+	echo "usage ${0##*/}"
 	echo '    -c         Recreate the chroot before building'
 	echo '    -r <dir>   Create chroots in this directory'
 	exit 1
@@ -47,14 +47,13 @@ mkdir -p ${AURCACHEDIR}
 for package in ${depends[@]}; do
   IFS=$'\t' read -r packagename packageversion < <(cower -i --format '%n\t%v' ${package} 2>/dev/null)
 
-  if [ ! -z ${packagename} ]; then
+  if [[ ${packagename} ]]; then
     # not in main repos, check if in our local repo
-    if [ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${_arch}.pkg.tar.xz ]; then
+    if [[ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${_arch}.pkg.tar.xz ]]; then
       # not in our local repo, recurse
       cower -d ${package}
       pushd ${package}
-      aur-${_arch}-build
-      if [[ $? == 1 ]]; then
+      if ! aur-${_arch}-build; then
         echo "failed to build ${package} as a dependencity"
         exit 1
       fi
@@ -67,7 +66,7 @@ done
 # end of Auto dependency resolution
 ###############################################################################
 
-if ${clean_first} || [ ! -d "${chroots}/${repo}-${_arch}" ]; then
+if ${clean_first} || [[ ! -d "${chroots}/${repo}-${_arch}" ]]; then
 	echo "Creating chroot for [${repo}] (${_arch})..."
 	sudo rm -rf ${chroots}/${repo}-${_arch}
 	sudo mkdir -p ${chroots}/${repo}-${_arch}
