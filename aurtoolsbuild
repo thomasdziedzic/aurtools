@@ -4,8 +4,8 @@ base_packages='base base-devel sudo'
 
 cmd="$(basename "$0" build)"
 if [[ "${cmd%-*}" == multilib ]]; then
-        repo="${cmd}"
-        _arch='x86_64'
+	repo="${cmd}"
+	_arch='x86_64'
 	base_packages+=' gcc-multilib libtool-multilib'
 else
 	repo=${cmd%-*}
@@ -45,21 +45,21 @@ mkdir -p ${AURCACHEDIR}
 . PKGBUILD || { echo 'failed to source PKGBUILD'; exit 1; }
 
 for package in ${depends[@]}; do
-  IFS=$'\t' read -r packagename packageversion < <(cower -i --format '%n\t%v' ${package} 2>/dev/null)
+	IFS=$'\t' read -r packagename packageversion < <(cower -i --format '%n\t%v' ${package} 2>/dev/null)
 
-  if [[ ${packagename} ]]; then
-    # not in main repos, check if in our local repo
-    if [[ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${_arch}.pkg.tar.xz ]]; then
-      # not in our local repo, recurse
-      cower -d ${package}
-      pushd ${package}
-      if ! aur-${_arch}-build; then
-        echo "failed to build ${package} as a dependencity"
-        exit 1
-      fi
-      popd
-    fi
-  fi
+	if [[ ${packagename} ]]; then
+		# not in main repos, check if in our local repo
+		if [[ ! -f ${AURREPODIR}/${packagename}-${packageversion}-${_arch}.pkg.tar.xz ]]; then
+			# not in our local repo, recurse
+			cower -d ${package}
+			pushd ${package}
+			if ! aur-${_arch}-build; then
+				echo "failed to build ${package} as a dependencity"
+				exit 1
+			fi
+			popd
+		fi
+	fi
 done
 
 ###############################################################################
@@ -97,3 +97,5 @@ sudo umount ${chroots}/${repo}-${_arch}/root/var/cache/pacman/pkg/
 
 repo-add ${AURREPODIR}/aurtools.db.tar.gz *.pkg.tar.xz
 cp *.pkg.tar.xz ${AURREPODIR}
+
+# vim: set noet ts=2 sw=2:
