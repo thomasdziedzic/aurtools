@@ -42,7 +42,7 @@ mkdir -p ${AURCACHEDIR}
 # Auto dependency resolution
 ###############################################################################
 
-. PKGBUILD || (echo 'failed to source PKGBUILD' && exit 1)
+. PKGBUILD || { echo 'failed to source PKGBUILD'; exit 1; }
 
 for package in ${depends[@]}; do
   packagename=$(cower -i ${package} 2> /dev/null | awk '/Name/ { print $3 }')
