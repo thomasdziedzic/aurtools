@@ -45,8 +45,7 @@ mkdir -p ${AURCACHEDIR}
 . PKGBUILD || { echo 'failed to source PKGBUILD'; exit 1; }
 
 for package in ${depends[@]}; do
-  packagename=$(cower -i ${package} 2> /dev/null | awk '/Name/ { print $3 }')
-  packageversion=$(cower -i ${package} 2> /dev/null | awk '/Version/ { print $3 }')
+  IFS=$'\t' read -r packagename packageversion < <(cower -i --format '%n\t%v' ${package} 2>/dev/null)
 
   if [ ! -z ${packagename} ]; then
     # not in main repos, check if in our local repo
