@@ -1,1 +1,4 @@
 Depends on devtools.
+
+NOTICE: I have submitted patches to add multiple -I support for archbuild, https://bugs.archlinux.org/task/26265
+I will stop supporting this in favor of those patches.
